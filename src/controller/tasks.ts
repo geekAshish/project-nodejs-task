@@ -1,27 +1,23 @@
 import { Request, Response } from "express";
 import { Task } from "../models/Task";
+import { asyncWrapper } from "../middleware/async";
 
-export const getAllTasks = async (req: Request, res: Response) => {
-  try {
-    const allTask = await Task.find({});
-    res.status(200).json(allTask);
-  } catch (error) {
-    res.status(500).json(error);
-  }
-};
+export const getAllTasks = asyncWrapper(async (req: Request, res: Response) => {
+  const allTask = await Task.find({});
+  // res.status(200).json(allTask);
+  res
+    .status(200)
+    .json({ status: "success", data: { allTask, nbHits: allTask?.length } });
+});
 
 // wrap code in try-catch, so the user just don't hang, if something broke
-export const createTasks = async (req: Request, res: Response) => {
-  try {
-    const task = await Task.create(req.body);
-    res.status(201).json({ task });
-  } catch (error) {
-    res.status(500).json(error);
-  }
-};
+export const createTasks = asyncWrapper(async (req: Request, res: Response) => {
+  const task = await Task.create(req.body);
+  res.status(201).json({ task });
+});
 
-export const getTasksById = async (req: Request, res: Response) => {
-  try {
+export const getTasksById = asyncWrapper(
+  async (req: Request, res: Response) => {
     const { id: taskID } = req.params;
     const task = await Task.findOne({ _id: taskID });
 
@@ -31,17 +27,29 @@ export const getTasksById = async (req: Request, res: Response) => {
     }
 
     res.status(200).json(task);
-  } catch (error) {
-    res.status(500).json(error);
   }
-};
+);
 
-export const updateTasksById = (req: Request, res: Response) => {
-  res.send("Update task by id");
-};
+export const updateTasksById = asyncWrapper(
+  async (req: Request, res: Response) => {
+    const { id: taskID } = req.params;
 
-export const deleteTasksById = async (req: Request, res: Response) => {
-  try {
+    const task = await Task.findOneAndUpdate({ _id: taskID }, req.body, {
+      new: true,
+      runValidators: true,
+    });
+
+    if (!task) {
+      res.status(404).json({ msg: "task not found", taskId: taskID });
+      return;
+    }
+
+    res.status(200).json(task);
+  }
+);
+
+export const deleteTasksById = asyncWrapper(
+  async (req: Request, res: Response) => {
     const { id: taskID } = req.params;
     const task = await Task.findOneAndDelete({ _id: taskID });
 
@@ -53,7 +61,5 @@ export const deleteTasksById = async (req: Request, res: Response) => {
     res.status(200).json(task);
     // res.status(200).send();
     // res.status(200).json({ status: "success" });
-  } catch (error) {
-    res.status(500).json(error);
   }
-};
+);

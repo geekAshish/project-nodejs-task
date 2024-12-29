@@ -10,4 +10,7 @@ https://api.name.com/api/v1/tasks/:id?param-one=value-one&param-two=value-two
 2. other extra properties are gonna ignored
 3. can add validation on schema
 
-2:06:00
+# Different between PUT vs PATCH
+
+1. PATCH : it just update the field which is coming in req
+2. PUT : it will replace the whole field with the coming req
