@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import { connectDB } from "./db/connect";
 import router from "./routes/tasks";
 import { notFound } from "./middleware/not-found";
+import { errorHandlerMiddleware } from "./middleware/error-handler";
 
 dotenv.config();
 
@@ -15,7 +16,8 @@ app.use(express.json());
 // route
 app.use("/api/v1/tasks", router);
 
-// app.use(notFound);
+app.use(notFound as any);
+app.use(errorHandlerMiddleware as any);
 
 const start = async () => {
   try {
